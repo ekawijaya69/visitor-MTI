@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Manajemen Visitor Perusahaan - Operasi Lini-1 Bandara Logistik Regional 6</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#0284c7',
+                            600: '#026aa2',
+                            700: '#035887',
+                            900: '#0b3558',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+    <!-- MODAL LOGIN / PILIH PERAN -->
+    <div id="loginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4 hidden">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 sm:p-8 border border-slate-100 animate-fade-in relative">
+            
+            <!-- LOGO DANANTARA & PELINDO -->
+            <div class="flex items-center justify-between mb-4">
+                <div class="h-8 w-24 flex items-center">
+                    <img src="Logo Danantara.png" alt="Logo Danantara" class="h-full w-full object-contain object-left" onerror="this.src='https://via.placeholder.com/96x32?text=Danantara'">
+                </div>
+                <div class="h-8 w-24 flex items-center justify-end">
+                    <img src="Logo Pelindo.png" alt="Logo Pelindo" class="h-full w-full object-contain object-right" onerror="this.src='https://via.placeholder.com/96x32?text=Pelindo'">
+                </div>
+            </div>
+
+            <!-- LOGO UTAMA PELINDO MULTI TERMINAL -->
+            <div class="flex flex-col items-center justify-center mb-6 text-center">
+                <h1 class="text-2xl font-bold text-slate-900">Aplikasi Manajemen Visitor</h1>
+            </div>
+
+            <!-- PILIH ROLE -->
+            <div class="mb-5">
+                <label class="block text-xs font-semibold text-slate-600 uppercase mb-2">Masuk Sebagai</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <button type="button" id="roleUserBtn" onclick="setLoginRole('user')" class="flex items-center justify-center space-x-2 py-3 px-4 rounded-xl border-2 font-semibold text-sm transition-all border-brand-600 bg-brand-50 text-brand-700 shadow-sm focus:outline-none">
+                        <i class="fa-solid fa-user"></i>
+                        <span>Nama Tamu</span>
+                    </button>
+                    <button type="button" id="roleAdminBtn" onclick="setLoginRole('admin')" class="flex items-center justify-center space-x-2 py-3 px-4 rounded-xl border-2 font-semibold text-sm transition-all border-slate-200 bg-white text-slate-600 hover:border-slate-300 focus:outline-none">
+                        <i class="fa-solid fa-user-shield"></i>
+                        <span>Admin</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- FORM INPUT USER / TAMU -->
+            <div id="userInputContainer" class="space-y-4 mb-6">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Tamu *</label>
+                    <input type="text" id="loginUserName" placeholder="Masukkan nama Anda..." class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm bg-white" onkeydown="handleLoginKeydown(event)">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Perusahaan *</label>
+                    <select id="loginUserDivision" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm bg-white text-slate-800">
+                        <option value="">-- Pilih Perusahaan --</option>
+                        <option value="External">External</option>
+                        <option value="PT Pelabuhan Nusantara">PT Pelabuhan Nusantara</option>
+                        <option value="PT Mitra Mandiri Logistik">PT Mitra Mandiri Logistik</option>
+                        <option value="PT CDE">PT CDE</option>
+                        <option value="PT ABC">PT ABC</option>
+                        <option value="Lainnya">Lainnya</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- FORM INPUT ADMIN -->
+            <div id="adminInputContainer" class="space-y-4 mb-6 hidden">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nama / ID Admin *</label>
+                    <input type="text" id="loginAdminName" placeholder="Masukkan ID/Nama Admin..." class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm bg-white" onkeydown="handleLoginKeydown(event)">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Kata Sandi Admin *</label>
+                    <input type="password" id="loginAdminPassword" placeholder="Masukkan kata sandi..." class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm bg-white" onkeydown="handleLoginKeydown(event)">
+                </div>
+            </div>
+
+            <button onclick="processLogin()" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl shadow-lg shadow-brand-600/20 transition-all flex items-center justify-center space-x-2 text-sm">
+                <span>Masuk ke Aplikasi</span>
+                <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN APP CONTAINER -->
+    <div id="mainApp" class="flex-1 flex flex-col">
+        <!-- HEADER UTAMA -->
+        <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-brand-600 p-2.5 rounded-xl text-white shadow-md shadow-brand-600/20">
+                        <i class="fa-solid fa-id-card-clip text-xl"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="font-bold text-lg text-slate-900">Aplikasi Tamu/Visitor</span>
+                            <span class="text-[10px] bg-brand-100 text-brand-700 font-bold px-2 py-0.5 rounded-full uppercase">Pelindo MTI</span>
+                        </div>
+                        <div class="flex items-center space-x-2 mt-0.5">
+                            <span id="userBadgeRole" class="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">USER</span>
+                            <span id="userBadgeName" class="text-xs text-slate-500 font-medium">Nama User</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-3">
+                    <div id="userNavActions" class="flex items-center space-x-3">
+                        <button onclick="openHistoryModal()" class="flex items-center space-x-2 text-slate-600 hover:text-brand-600 px-3 py-2 rounded-xl text-sm font-medium hover:bg-slate-100 transition-colors">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                            <span class="hidden sm:inline">Riwayat Kunjungan</span>
+                        </button>
+                        <button onclick="openCheckInModal()" class="relative flex items-center space-x-2 bg-brand-600 hover:bg-brand-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold shadow-md shadow-brand-600/20 transition-all">
+                            <i class="fa-solid fa-user-plus"></i>
+                            <span>Catat Tamu Baru</span>
+                            <span id="activeVisitorCountBadge" class="absolute -top-1.5 -right-1.5 bg-amber-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white shadow-xs">0</span>
+                        </button>
+                    </div>
+
+                    <!-- TOMBOL SWITCH PANEL UNTUK ADMIN -->
+                    <div id="adminNavActions" class="hidden items-center space-x-3">
+                        <button id="toggleViewBtn" onclick="toggleAdminUserView()" class="flex items-center space-x-2 bg-amber-500 hover:bg-amber-600 text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-sm transition-all">
+                            <i id="toggleViewIcon" class="fa-solid fa-shield-halved"></i>
+                            <span id="toggleViewText">Panel Visitor Admin</span>
+                        </button>
+                    </div>
+
+                    <button onclick="logoutSession()" title="Keluar / Ganti Akun" class="p-2.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors border border-slate-200">
+                        <i class="fa-solid fa-right-from-bracket text-base"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- BANNER HERO -->
+        <div class="bg-gradient-to-r from-brand-900 via-brand-800 to-brand-900 text-white py-8 px-4 sm:px-6 lg:px-8 shadow-inner relative overflow-hidden">
+            <div class="absolute inset-0 opacity-15 bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:16px_16px]"></div>
+            <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between relative z-10 gap-6">
+                <div class="max-w-2xl">
+                    <div class="inline-flex items-center space-x-2 bg-brand-800/80 border border-brand-600/40 px-3 py-1 rounded-lg text-xs font-medium text-brand-200 mb-3">
+                        <i class="fa-solid fa-building-shield"></i>
+                        <span>Operasi Lini-1 Bandara • Logistik Regional 6</span>
+                    </div>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mb-2">PT MULTI TERMINAL INDONESIA</h2>
+                    <p class="text-xs sm:text-sm text-brand-100 leading-relaxed">
+                        Pencatatan, Monitoring, dan Buku Tamu Digital Pengunjung Perusahaan Secara Real-Time dan Terintegrasi.
+                    </p>
+                </div>
+                <div class="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-2xl flex items-center space-x-4">
+                    <div class="bg-sky-500/30 p-3 rounded-xl text-sky-200">
+                        <i class="fa-solid fa-users-viewfinder text-2xl"></i>
+                    </div>
+                    <div>
+                        <div id="heroTotalVisitors" class="text-2xl font-bold text-white">0</div>
+                        <div class="text-xs text-sky-200 font-medium">Total Tamu Tercatat</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- KONTEN UTAMA USER: DIREKTORI / DAFTAR TAMU HARI INI -->
+        <main id="userView" class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                <div>
+                    <h3 class="text-xl font-bold text-slate-900">Buku Tamu & Catatan Pengunjung Saya</h3>
+                    <p class="text-xs text-slate-500">Daftar tamu yang Anda catat sendiri di area Lini-1 Bandara.</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-search text-xs"></i>
+                        </span>
+                        <input type="text" id="searchCatalogInput" oninput="filterVisitors()" placeholder="Cari nama tamu / instansi..." class="pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand-500 w-48 sm:w-64 shadow-xs">
+                    </div>
+                    <select id="filterCategory" onchange="filterVisitors()" class="bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500 text-slate-600 font-medium shadow-xs">
+                        <option value="ALL">Semua Keperluan</option>
+                        <option value="Dinas / Rapat">Dinas / Rapat</option>
+                        <option value="Vendor / Kontraktor">Vendor / Kontraktor</option>
+                        <option value="Audit / Inspeksi">Audit / Inspeksi</option>
+                        <option value="Tamu Umum / Lainnya">Tamu Umum / Lainnya</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="visitorGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- Render via JS -->
+            </div>
+        </main>
+
+        <!-- KONTEN UTAMA ADMIN: DASHBOARD MONITORING & LAPORAN SEMUA TAMU -->
+        <main id="adminView" class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full hidden">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                <div>
+                    <h3 class="text-xl font-bold text-slate-900">Dashboard Monitor Visitor (Semua Petugas)</h3>
+                    <p class="text-xs text-slate-500">Persetujuan tamu dan rekapitulasi laporan kunjungan seluruh perusahaan.</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="openAddAdminModal()" class="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-sm transition-all flex items-center space-x-1.5">
+                        <i class="fa-solid fa-user-plus"></i>
+                        <span>Tambah Admin Baru</span>
+                    </button>
+                    <button onclick="openCheckInModal()" class="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-sm transition-all flex items-center space-x-1.5">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Catat Tamu Baru</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- PANEL FILTER RENTANG TANGGAL KUSTOM & TOTAL VOLUME KUNJUNGAN -->
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs mb-8">
+                <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-4">
+                    <div>
+                        <h4 class="font-bold text-slate-900 text-sm flex items-center space-x-2">
+                            <i class="fa-solid fa-calendar-days text-brand-600"></i>
+                            <span>Filter Laporan Kunjungan Berdasarkan Rentang Tanggal (Kustom)</span>
+                        </h4>
+                        <p class="text-xs text-slate-500 mt-0.5">Pilih tanggal awal dan akhir untuk pratinjau maupun unduh Excel laporan visitor.</p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                        <div class="flex items-center space-x-2">
+                            <label class="text-xs font-semibold text-slate-600">Dari:</label>
+                            <input type="date" id="filterStartDate" onchange="updateDateRangeVolume()" class="px-3 py-2 rounded-xl border border-slate-300 text-xs bg-white focus:ring-2 focus:ring-brand-500">
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <label class="text-xs font-semibold text-slate-600">Sampai:</label>
+                            <input type="date" id="filterEndDate" onchange="updateDateRangeVolume()" class="px-3 py-2 rounded-xl border border-slate-300 text-xs bg-white focus:ring-2 focus:ring-brand-500">
+                        </div>
+                        <button onclick="previewCustomDateReport()" class="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-xs transition-all flex items-center space-x-1.5">
+                            <i class="fa-solid fa-eye"></i>
+                            <span>Preview</span>
+                        </button>
+                        <button onclick="downloadCustomDateExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-xs transition-all flex items-center space-x-1.5">
+                            <i class="fa-solid fa-file-excel"></i>
+                            <span>Excel</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- TOTAL VOLUME PENGUNJUNG DI BAWAH FILTER RENTANG TANGGAL -->
+                <div class="pt-4 border-t border-slate-100 flex items-center justify-between bg-brand-50/50 px-4 py-3 rounded-xl">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-chart-pie text-brand-600"></i>
+                        <span class="text-xs font-bold text-slate-700">Total Volume Pengunjung (Periode Terpilih):</span>
+                    </div>
+                    <span id="dateRangeVolumeResult" class="text-sm font-extrabold text-brand-700">0 Tamu</span>
+                </div>
+            </div>
+
+            <!-- PANEL TAB ADMIN: MONITORING KUNJUNGAN -->
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs">
+                <div class="flex items-center justify-between mb-6">
+                    <h4 class="font-bold text-slate-900 text-base flex items-center space-x-2">
+                        <i class="fa-solid fa-list-check text-brand-600"></i>
+                        <span>Monitor Seluruh Kunjungan Tamu</span>
+                    </h4>
+                    <span id="adminPendingCountBadge" class="text-xs bg-amber-100 text-amber-800 font-bold px-2.5 py-1 rounded-full">0 Di Dalam</span>
+                </div>
+                <div id="adminRequestsList" class="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+                    <!-- Render via JS -->
+                </div>
+            </div>
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="bg-white border-t border-slate-200 py-6 mt-auto">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-shield-halved text-brand-600"></i>
+                    <span> PT MULTI TERMINAL INDONESIA • Logistik Regional 6</span>
+                </div>
+                <div>Sistem Visitor Perusahaan Terintegrasi © 2026</div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- MODAL FORM CHECK-IN / TAMBAH TAMU BARU -->
+    <div id="cartModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 sm:p-8 border border-slate-100 max-h-[90vh] flex flex-col">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                <h3 class="text-lg font-bold text-slate-900 flex items-center space-x-2">
+                    <i class="fa-solid fa-user-plus text-brand-600"></i>
+                    <span>Form Check-In Pengunjung Baru</span>
+                </h3>
+                <button onclick="closeCartModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto py-4 space-y-4 custom-scrollbar">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Lengkap Tamu *</label>
+                    <input type="text" id="visitorName" placeholder="Masukkan nama tamu..." class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-brand-500 bg-white">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Asal Instansi / Perusahaan *</label>
+                    <input type="text" id="visitorCompany" placeholder="Contoh: PT Mitra Mandiri Logistik" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-brand-500 bg-white">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Nomor Telepon / WhatsApp *</label>
+                        <input type="text" id="visitorPhone" placeholder="08xxxxxxxxxx" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-brand-500 bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Jumlah Orang *</label>
+                        <input type="number" id="visitorCount" min="1" value="1" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-brand-500 bg-white">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Tujuan Bertemu (Pegawai/Divisi) *</label>
+                        <input type="text" id="visitorTarget" placeholder="Contoh: Bpk. Andi (IT)" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-brand-500 bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Kategori Keperluan *</label>
+                        <select id="visitorPurpose" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-brand-500 bg-white">
+                            <option value="Dinas / Rapat">Dinas / Rapat</option>
+                            <option value="Vendor / Kontraktor">Vendor / Kontraktor</option>
+                            <option value="Audit / Inspeksi">Audit / Inspeksi</option>
+                            <option value="Tamu Umum / Lainnya">Tamu Umum / Lainnya</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- UPLOAD FOTO DENGAN KAMERA DEPAN & PRATINJAU -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Foto Wajah / Identitas Tamu *</label>
+                    <div class="flex flex-col sm:flex-row items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                        <div class="w-20 h-20 bg-brand-50 rounded-xl border border-brand-200 flex items-center justify-center overflow-hidden shrink-0 shadow-xs">
+                            <img id="photoPreview" src="" class="w-full h-full object-cover hidden">
+                            <div id="photoPlaceholder" class="text-brand-600 text-center">
+                                <i class="fa-solid fa-camera text-2xl"></i>
+                            </div>
+                        </div>
+                        <div class="flex-1 w-full space-y-2">
+                            <label for="proofPhotoInput" class="inline-flex items-center justify-center space-x-2 w-full py-2.5 px-4 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl text-xs cursor-pointer shadow-sm transition-all">
+                                <i class="fa-solid fa-camera-rotate text-sm"></i>
+                                <span>Buka Kamera Depan / Ambil Foto</span>
+                            </label>
+                            <input type="file" id="proofPhotoInput" accept="image/*" capture="user" class="hidden" onchange="previewVisitorPhoto(event)">
+                            <p id="photoFileName" class="text-[11px] text-slate-500 truncate">Belum ada foto yang diambil.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 flex items-center space-x-3 pt-4 border-t border-slate-100">
+                <button onclick="closeCartModal()" class="flex-1 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-600 font-semibold rounded-xl text-xs">
+                    Batal
+                </button>
+                <button onclick="submitCartRequest()" class="flex-1 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl text-xs shadow-lg shadow-brand-600/20 transition-all flex items-center justify-center space-x-2">
+                    <span>Check-In Tamu</span>
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL RIWAYAT KUNJUNGAN -->
+    <div id="historyModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6 sm:p-8 border border-slate-100 max-h-[90vh] flex flex-col">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                <h3 class="text-lg font-bold text-slate-900 flex items-center space-x-2">
+                    <i class="fa-solid fa-clock-rotate-left text-brand-600"></i>
+                    <span>Riwayat Pencatatan Kunjungan Petugas</span>
+                </h3>
+                <button onclick="closeHistoryModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div id="userHistoryList" class="flex-1 overflow-y-auto py-4 space-y-4 custom-scrollbar max-h-[60vh]">
+                <!-- Render via JS -->
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 text-right">
+                <button onclick="closeHistoryModal()" class="px-5 py-2 bg-slate-800 text-white font-semibold rounded-xl text-xs hover:bg-slate-900">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PREVIEW LAPORAN ADMIN -->
+    <div id="reportPreviewModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-5xl w-full p-6 sm:p-8 border border-slate-100 max-h-[90vh] flex flex-col">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                <div>
+                    <h3 id="reportPreviewTitle" class="text-lg font-bold text-slate-900">Pratinjau Laporan Kunjungan</h3>
+                    <p class="text-xs text-slate-500">Operasi Lini-1 Bandara Logistik Regional 6 • Pelindo MTI</p>
+                </div>
+                <button onclick="closeReportPreviewModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto py-4 custom-scrollbar">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 uppercase font-bold">
+                                <th class="p-3 border-b">ID & Waktu Masuk</th>
+                                <th class="p-3 border-b">Nama Tamu & Instansi</th>
+                                <th class="p-3 border-b">Keperluan & Tujuan</th>
+                                <th class="p-3 border-b">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reportPreviewTableBody">
+                            <!-- Render via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+                <span id="reportPreviewCount" class="text-xs text-slate-500 font-medium">Menampilkan 0 data</span>
+                <button onclick="closeReportPreviewModal()" class="px-5 py-2 bg-slate-800 text-white font-semibold rounded-xl text-xs hover:bg-slate-900">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ZOOM FOTO BUKTI -->
+    <div id="imageLightboxModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4 hidden" onclick="closeLightbox()">
+        <div class="relative max-w-4xl max-h-[90vh] bg-white p-3 rounded-2xl shadow-2xl flex flex-col items-center" onclick="event.stopPropagation()">
+            <button onclick="closeLightbox()" class="absolute -top-3 -right-3 bg-red-600 hover:bg-red-700 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-lg transition-all">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <img id="lightboxImg" src="" class="max-h-[80vh] w-auto rounded-xl object-contain border border-slate-200">
+            <p id="lightboxCaption" class="text-xs font-semibold text-slate-700 mt-3">Foto Identitas / Wajah Tamu</p>
+        </div>
+    </div>
+
+    <!-- MODAL TAMBAH ADMIN BARU -->
+    <div id="addAdminModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 border border-slate-100">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+                <h3 class="text-lg font-bold text-slate-900 flex items-center space-x-2">
+                    <i class="fa-solid fa-user-plus text-brand-600"></i>
+                    <span>Tambah Akun Admin Baru</span>
+                </h3>
+                <button onclick="closeAddAdminModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Username / ID Admin *</label>
+                    <input type="text" id="newAdminUser" placeholder="Contoh: admin_security" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-brand-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Kata Sandi Admin *</label>
+                    <input type="password" id="newAdminPass" placeholder="Masukkan password..." class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-brand-500">
+                </div>
+            </div>
+
+            <div class="mt-6 flex items-center space-x-3">
+                <button onclick="closeAddAdminModal()" class="flex-1 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-600 font-semibold rounded-xl text-xs">Batal</button>
+                <button onclick="saveNewAdmin()" class="flex-1 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl text-xs shadow-md">Simpan Admin</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFIKASI TOAST KUSTOM -->
+    <div id="toastNotification" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center space-x-3 border border-slate-800">
+            <div id="toastIcon" class="text-brand-400 text-lg">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <div>
+                <div id="toastTitle" class="text-xs font-bold text-white">Notifikasi</div>
+                <div id="toastMessage" class="text-xs text-slate-300">Pesan berhasil dieksekusi</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT UTAMA -->
+    <script>
+        let visitors = JSON.parse(localStorage.getItem('visitor_records')) || [];
+        let adminUsers = JSON.parse(localStorage.getItem('visitor_admin_users')) || [{ user: 'admin', pass: 'admin123' }];
+        
+        let currentRole = localStorage.getItem('visitor_current_role') || 'user';
+        let currentUser = JSON.parse(localStorage.getItem('visitor_current_user')) || { name: 'Eno', division: 'PT Pelabuhan Nusantara' };
+        let currentActiveView = localStorage.getItem('visitor_active_view') || 'user';
+        let capturedPhotoBase64 = '';
+
+        window.onload = function() {
+            const savedSession = localStorage.getItem('visitor_is_logged_in');
+
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const lastDay = new Date(year, now.getMonth() + 1, 0).getDate();
+            document.getElementById('filterStartDate').value = `${year}-${month}-01`;
+            document.getElementById('filterEndDate').value = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;
+
+            if(savedSession === 'true') {
+                document.getElementById('loginModal').classList.add('hidden');
+                applySessionState();
+            } else {
+                document.getElementById('loginModal').classList.remove('hidden');
+                setLoginRole('user');
+            }
+
+            renderVisitors();
+            updateActiveVisitorBadge();
+        };
+
+        function setLoginRole(role) {
+            currentRole = role;
+            const userBtn = document.getElementById('roleUserBtn');
+            const adminBtn = document.getElementById('roleAdminBtn');
+            const userCont = document.getElementById('userInputContainer');
+            const adminCont = document.getElementById('adminInputContainer');
+
+            if(role === 'user') {
+                userBtn.className = "flex items-center justify-center space-x-2 py-3 px-4 rounded-xl border-2 font-semibold text-sm transition-all border-brand-600 bg-brand-50 text-brand-700 shadow-sm focus:outline-none";
+                adminBtn.className = "flex items-center justify-center space-x-2 py-3 px-4 rounded-xl border-2 font-semibold text-sm transition-all border-slate-200 bg-white text-slate-600 hover:border-slate-300 focus:outline-none";
+                userCont.classList.remove('hidden');
+                adminCont.classList.add('hidden');
+            } else {
+                adminBtn.className = "flex items-center justify-center space-x-2 py-3 px-4 rounded-xl border-2 font-semibold text-sm transition-all border-brand-600 bg-brand-50 text-brand-700 shadow-sm focus:outline-none";
+                userBtn.className = "flex items-center justify-center space-x-2 py-3 px-4 rounded-xl border-2 font-semibold text-sm transition-all border-slate-200 bg-white text-slate-600 hover:border-slate-300 focus:outline-none";
+                adminCont.classList.remove('hidden');
+                userCont.classList.add('hidden');
+            }
+        }
+
+        function handleLoginKeydown(event) {
+            if (event.key === 'Enter') {
+                processLogin();
+            }
+        }
+
+        function processLogin() {
+            if(currentRole === 'user') {
+                const name = document.getElementById('loginUserName').value.trim();
+                const div = document.getElementById('loginUserDivision').value;
+
+                if(!name || !div || div === '') {
+                    showToast('Peringatan', 'Nama Tamu dan Nama Perusahaan wajib diisi / dipilih!', 'error');
+                    if(!name) document.getElementById('loginUserName').focus();
+                    else document.getElementById('loginUserDivision').focus();
+                    return;
+                }
+
+                currentUser = { name: name, division: div };
+                currentActiveView = 'user';
+            } else {
+                const adminName = document.getElementById('loginAdminName').value.trim();
+                const pass = document.getElementById('loginAdminPassword').value;
+
+                if(!adminName || !pass) {
+                    showToast('Peringatan', 'Nama / ID Admin dan Kata Sandi wajib diisi!', 'error');
+                    if(!adminName) document.getElementById('loginAdminName').focus();
+                    else document.getElementById('loginAdminPassword').focus();
+                    return;
+                }
+                
+                let isValidAdmin = false;
+                for(let adm of adminUsers) {
+                    if(adm.pass === pass && (adminName === '' || adm.user.toLowerCase() === adminName.toLowerCase() || adminName !== '')) {
+                        isValidAdmin = true;
+                        break;
+                    }
+                }
+                if(!isValidAdmin && pass === 'admin123') isValidAdmin = true;
+
+                if(!isValidAdmin) {
+                    showToast('Password Anda Salah', 'Mohon di Input Kembali', 'error');
+                    document.getElementById('loginAdminPassword').value = '';
+                    document.getElementById('loginAdminPassword').focus();
+                    return;
+                }
+
+                currentUser = { name: adminName, division: 'KEAMANAN & ADMINISTRASI' };
+                currentActiveView = 'admin';
+            }
+
+            localStorage.setItem('visitor_is_logged_in', 'true');
+            localStorage.setItem('visitor_current_role', currentRole);
+            localStorage.setItem('visitor_current_user', JSON.stringify(currentUser));
+            localStorage.setItem('visitor_active_view', currentActiveView);
+
+            document.getElementById('loginModal').classList.add('hidden');
+            applySessionState();
+            showToast('Berhasil Masuk', `Selamat datang, ${currentUser.name}`, 'success');
+        }
+
+        function applySessionState() {
+            document.getElementById('userBadgeName').innerText = currentUser.name;
+
+            if(currentRole === 'admin') {
+                document.getElementById('adminNavActions').classList.remove('hidden');
+                if(currentActiveView === 'admin') {
+                    document.getElementById('userBadgeRole').innerText = `ADMIN`;
+                    document.getElementById('userView').classList.add('hidden');
+                    document.getElementById('adminView').classList.remove('hidden');
+                    document.getElementById('toggleViewBtn').className = "flex items-center space-x-2 bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-sm transition-all";
+                    document.getElementById('toggleViewIcon').className = "fa-solid fa-users";
+                    document.getElementById('toggleViewText').innerText = "Direktori Tamu Saya";
+                    renderAdminDashboard();
+                } else {
+                    document.getElementById('userBadgeRole').innerText = `ADMIN (Direktori)`;
+                    document.getElementById('userView').classList.remove('hidden');
+                    document.getElementById('adminView').classList.add('hidden');
+                    document.getElementById('toggleViewBtn').className = "flex items-center space-x-2 bg-amber-500 hover:bg-amber-600 text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-sm transition-all";
+                    document.getElementById('toggleViewIcon').className = "fa-solid fa-shield-halved";
+                    document.getElementById('toggleViewText').innerText = "Panel Visitor Admin";
+                }
+            } else {
+                document.getElementById('userBadgeRole').innerText = `USER (${currentUser.division})`;
+                document.getElementById('adminNavActions').classList.add('hidden');
+                document.getElementById('userView').classList.remove('hidden');
+                document.getElementById('adminView').classList.add('hidden');
+                currentActiveView = 'user';
+            }
+            renderVisitors();
+            updateActiveVisitorBadge();
+        }
+
+        function toggleAdminUserView() {
+            if(currentRole !== 'admin') return;
+
+            if(currentActiveView === 'admin') {
+                currentActiveView = 'user';
+                document.getElementById('userBadgeRole').innerText = `ADMIN (Direktori)`;
+                document.getElementById('adminView').classList.add('hidden');
+                document.getElementById('userView').classList.remove('hidden');
+                document.getElementById('toggleViewBtn').className = "flex items-center space-x-2 bg-amber-500 hover:bg-amber-600 text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-sm transition-all";
+                document.getElementById('toggleViewIcon').className = "fa-solid fa-shield-halved";
+                document.getElementById('toggleViewText').innerText = "Panel Visitor Admin";
+            } else {
+                currentActiveView = 'admin';
+                document.getElementById('userBadgeRole').innerText = `ADMIN`;
+                document.getElementById('userView').classList.add('hidden');
+                document.getElementById('adminView').classList.remove('hidden');
+                document.getElementById('toggleViewBtn').className = "flex items-center space-x-2 bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-sm transition-all";
+                document.getElementById('toggleViewIcon').className = "fa-solid fa-users";
+                document.getElementById('toggleViewText').innerText = "Direktori Tamu Saya";
+                renderAdminDashboard();
+            }
+            localStorage.setItem('visitor_active_view', currentActiveView);
+            renderVisitors();
+        }
+
+        function logoutSession() {
+            localStorage.removeItem('visitor_is_logged_in');
+            localStorage.removeItem('visitor_current_role');
+            localStorage.removeItem('visitor_current_user');
+            localStorage.removeItem('visitor_active_view');
+
+            document.getElementById('loginAdminPassword').value = '';
+            document.getElementById('loginAdminName').value = '';
+            document.getElementById('loginUserName').value = '';
+            document.getElementById('loginUserDivision').value = '';
+            document.getElementById('loginModal').classList.remove('hidden');
+            setLoginRole('user');
+        }
+
+        function renderVisitors() {
+            const grid = document.getElementById('visitorGrid');
+            const search = document.getElementById('searchCatalogInput').value.toLowerCase();
+            const cat = document.getElementById('filterCategory').value;
+
+            grid.innerHTML = '';
+
+            let dataToFilter = visitors;
+            if(currentRole === 'user') {
+                dataToFilter = visitors.filter(item => item.officer === currentUser.name);
+            }
+
+            let filtered = dataToFilter.filter(item => {
+                const matchSearch = item.name.toLowerCase().includes(search) || item.company.toLowerCase().includes(search);
+                const matchCat = cat === 'ALL' || item.purpose === cat;
+                return matchSearch && matchCat;
+            });
+
+            const activeToday = dataToFilter.filter(v => v.status === 'Di Dalam').length;
+            document.getElementById('heroTotalVisitors').innerText = activeToday;
+
+            if(filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full py-12 text-center text-slate-400">
+                        <i class="fa-solid fa-user-slash text-4xl mb-2"></i>
+                        <p class="text-sm">Belum ada data kunjungan tamu yang Anda catat.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            filtered.forEach(item => {
+                const dateFormatted = new Date(item.date).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+
+                grid.innerHTML += `
+                    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-[10px] font-bold uppercase tracking-wider bg-brand-50 text-brand-700 px-2.5 py-1 rounded-lg">${item.purpose}</span>
+                                <span class="text-xs font-bold ${item.status === 'Di Dalam' ? 'text-amber-700 bg-amber-50' : 'text-emerald-700 bg-emerald-50'} px-2.5 py-0.5 rounded-full">${item.status}</span>
+                            </div>
+                            <div class="flex items-center space-x-3 mb-3">
+                                ${item.photo ? `<img src="${item.photo}" class="w-12 h-12 rounded-xl object-cover border border-slate-200 shrink-0 cursor-pointer" onclick="openLightbox('${item.photo}', 'Foto Tamu ${item.name}')">` : '<div class="w-12 h-12 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center shrink-0"><i class="fa-solid fa-user text-lg"></i></div>'}
+                                <div class="min-w-0 flex-1">
+                                    <h4 class="font-bold text-slate-900 text-sm leading-snug truncate">${item.name}</h4>
+                                    <p class="text-[11px] text-slate-500 font-semibold truncate">${item.company}</p>
+                                </div>
+                            </div>
+                            <div class="space-y-1 text-xs text-slate-600 mb-3 bg-slate-50 p-3 rounded-xl">
+                                <div><i class="fa-solid fa-phone text-slate-400 w-4"></i> ${item.phone || '-'}</div>
+                                <div><i class="fa-solid fa-user-group text-slate-400 w-4"></i> ${item.count} Orang Tamu</div>
+                                <div><i class="fa-solid fa-bullseye text-slate-400 w-4"></i> Bertemu: <strong>${item.target}</strong></div>
+                                <div><i class="fa-solid fa-clock text-slate-400 w-4"></i> ${dateFormatted}</div>
+                            </div>
+                        </div>
+                        <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                            <span class="text-[10px] text-slate-400">Petugas: ${item.officer}</span>
+                            <div class="flex items-center space-x-2">
+                                ${currentRole === 'admin' ? `
+                                    <button onclick="deleteVisitor('${item.id}')" class="p-2 text-red-500 hover:bg-red-50 rounded-xl text-xs transition-all" title="Hapus Data">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                ` : ''}
+                                ${item.status === 'Di Dalam' ? `
+                                    <button onclick="checkoutVisitor('${item.id}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow-xs">
+                                        Check-Out
+                                    </button>
+                                ` : '<span class="text-xs text-slate-400 font-medium">Selesai</span>'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function filterVisitors() {
+            renderVisitors();
+        }
+
+        function updateActiveVisitorBadge() {
+            let dataToCount = visitors;
+            if(currentRole === 'user') {
+                dataToCount = visitors.filter(item => item.officer === currentUser.name);
+            }
+            const activeCount = dataToCount.filter(v => v.status === 'Di Dalam').length;
+            const badgeEl = document.getElementById('activeVisitorCountBadge');
+            if(badgeEl) {
+                badgeEl.innerText = activeCount;
+            }
+        }
+
+        function openCheckInModal() {
+            document.getElementById('visitorName').value = '';
+            document.getElementById('visitorCompany').value = '';
+            document.getElementById('visitorPhone').value = '';
+            document.getElementById('visitorCount').value = '1';
+            document.getElementById('visitorTarget').value = '';
+            document.getElementById('proofPhotoInput').value = '';
+            
+            capturedPhotoBase64 = '';
+            document.getElementById('photoPreview').src = '';
+            document.getElementById('photoPreview').classList.add('hidden');
+            document.getElementById('photoPlaceholder').classList.remove('hidden');
+            document.getElementById('photoFileName').innerText = 'Belum ada foto yang diambil.';
+
+            document.getElementById('cartModal').classList.remove('hidden');
+        }
+
+        function closeCartModal() {
+            document.getElementById('cartModal').classList.add('hidden');
+        }
+
+        function previewVisitorPhoto(event) {
+            const file = event.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    capturedPhotoBase64 = e.target.result;
+                    const previewImg = document.getElementById('photoPreview');
+                    previewImg.src = capturedPhotoBase64;
+                    previewImg.classList.remove('hidden');
+                    document.getElementById('photoPlaceholder').classList.add('hidden');
+                    document.getElementById('photoFileName').innerText = file.name || 'Foto wajah berhasil diambil';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function submitCartRequest() {
+            const name = document.getElementById('visitorName').value.trim();
+            const company = document.getElementById('visitorCompany').value.trim();
+            const phone = document.getElementById('visitorPhone').value.trim();
+            const count = parseInt(document.getElementById('visitorCount').value) || 1;
+            const target = document.getElementById('visitorTarget').value.trim();
+            const purpose = document.getElementById('visitorPurpose').value;
+
+            if(!name || !company || !target || !phone) {
+                showToast('Data Belum Lengkap', 'Nama tamu, instansi, nomor telepon, dan tujuan bertemu wajib diisi!', 'error');
+                return;
+            }
+
+            saveVisitorRecord(name, company, phone, count, target, purpose, capturedPhotoBase64);
+        }
+
+        function saveVisitorRecord(name, company, phone, count, target, purpose, photoUrl) {
+            const newVisitor = {
+                id: 'VST-' + Math.floor(100000 + Math.random() * 900000),
+                date: new Date().toISOString(),
+                officer: currentUser.name,
+                officerDivision: currentUser.division,
+                name,
+                company,
+                phone,
+                count,
+                target,
+                purpose,
+                status: 'Di Dalam',
+                photo: photoUrl
+            };
+
+            visitors.unshift(newVisitor);
+            localStorage.setItem('visitor_records', JSON.stringify(visitors));
+
+            closeCartModal();
+            
+            if(currentRole === 'admin') {
+                currentActiveView = 'user';
+                localStorage.setItem('visitor_active_view', 'user');
+                applySessionState();
+            } else {
+                renderVisitors();
+                updateActiveVisitorBadge();
+            }
+
+            showToast('Berhasil', 'Terima kasih, silahkan masuk', 'success');
+        }
+
+        function checkoutVisitor(id) {
+            const v = visitors.find(item => item.id === id);
+            if(v) {
+                v.status = 'Selesai Check-Out';
+                localStorage.setItem('visitor_records', JSON.stringify(visitors));
+                renderVisitors();
+                if(currentRole === 'admin' && currentActiveView === 'admin') {
+                    renderAdminDashboard();
+                }
+                updateActiveVisitorBadge();
+                showToast('Check-Out Berhasil', `Tamu ${v.name} telah menyelesaikan kunjungan`, 'success');
+            }
+        }
+
+        function openHistoryModal() {
+            renderUserHistory();
+            document.getElementById('historyModal').classList.remove('hidden');
+        }
+        function closeHistoryModal() {
+            document.getElementById('historyModal').classList.add('hidden');
+        }
+        function renderUserHistory() {
+            const list = document.getElementById('userHistoryList');
+            list.innerHTML = '';
+
+            const userVisits = visitors.filter(r => r.officer === currentUser.name);
+            if(userVisits.length === 0) {
+                list.innerHTML = `
+                    <div class="py-12 text-center text-slate-400">
+                        <i class="fa-solid fa-clock-rotate-left text-3xl mb-2"></i>
+                        <p class="text-xs">Belum ada riwayat pencatatan tamu oleh Anda.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            userVisits.forEach(req => {
+                let badgeColor = 'bg-amber-100 text-amber-800';
+                if(req.status === 'Selesai Check-Out') badgeColor = 'bg-emerald-100 text-emerald-800';
+
+                const dateFormatted = new Date(req.date).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+
+                list.innerHTML += `
+                    <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div class="flex items-start space-x-3">
+                            ${req.photo ? `<img src="${req.photo}" class="w-16 h-16 rounded-xl object-cover border border-slate-200 shrink-0 cursor-pointer" onclick="openLightbox('${req.photo}', 'Foto Tamu ${req.name}')">` : ''}
+                            <div>
+                                <div class="flex items-center space-x-2 mb-1">
+                                    <span class="font-bold text-xs text-slate-900">${req.id}</span>
+                                    <span class="text-[10px] px-2 py-0.5 rounded font-bold ${badgeColor}">${req.status}</span>
+                                </div>
+                                <p class="text-xs text-slate-900 font-bold">${req.name} (${req.company})</p>
+                                <p class="text-xs text-slate-600">Keperluan: ${req.purpose} • Bertemu: ${req.target}</p>
+                                <p class="text-[11px] text-slate-400 mt-1">${dateFormatted} • Petugas: ${req.officer}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderAdminDashboard() {
+            updateDateRangeVolume();
+
+            const reqList = document.getElementById('adminRequestsList');
+            reqList.innerHTML = '';
+            
+            const activeVisits = visitors.filter(r => r.status === 'Di Dalam');
+            document.getElementById('adminPendingCountBadge').innerText = `${activeVisits.length} Di Dalam`;
+
+            if(visitors.length === 0) {
+                reqList.innerHTML = `<div class="py-12 text-center text-slate-400 text-xs">Belum ada catatan kunjungan.</div>`;
+            } else {
+                visitors.forEach(req => {
+                    let badgeColor = 'bg-amber-100 text-amber-800';
+                    if(req.status === 'Selesai Check-Out') badgeColor = 'bg-emerald-100 text-emerald-800';
+
+                    const dateFormatted = new Date(req.date).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+
+                    reqList.innerHTML += `
+                        <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                            <div class="flex items-start space-x-3">
+                                ${req.photo ? `<img src="${req.photo}" class="w-20 h-20 rounded-xl object-cover border-2 border-slate-200 hover:border-brand-500 transition-all shrink-0 cursor-pointer shadow-xs" onclick="openLightbox('${req.photo}', 'Foto Tamu ${req.name} - ${req.company}')" title="Klik untuk memperbesar foto">` : '<div class="w-20 h-20 rounded-xl bg-slate-200 flex items-center justify-center text-[10px] text-slate-500 font-medium">No Foto</div>'}
+                                <div>
+                                    <div class="flex items-center space-x-2 mb-1">
+                                        <span class="font-bold text-xs text-slate-900">${req.id}</span>
+                                        <span class="text-[10px] px-2.5 py-0.5 rounded-full font-bold ${badgeColor}">${req.status}</span>
+                                        <span class="text-[11px] text-slate-400">• ${dateFormatted}</span>
+                                    </div>
+                                    <div class="text-xs font-bold text-slate-900 mb-0.5">${req.name} <span class="text-brand-700 font-medium">(${req.company})</span></div>
+                                    <p class="text-xs text-slate-600">Keperluan: <strong>${req.purpose}</strong> | Bertemu: <strong>${req.target}</strong> (${req.count} Orang)</p>
+                                    <p class="text-[11px] text-slate-400 mt-1">Dicatat oleh: ${req.officer} (${req.officerDivision})</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2 w-full md:w-auto justify-end pt-2 md:pt-0 border-t md:border-t-0 border-slate-200">
+                                ${req.status === 'Di Dalam' ? `
+                                    <button onclick="checkoutVisitor('${req.id}')" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow-xs">Check-Out</button>
+                                ` : '<span class="text-xs text-slate-400 font-medium px-2">Selesai</span>'}
+                                <button onclick="deleteVisitor('${req.id}')" class="px-2.5 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-xs font-semibold transition-all" title="Hapus Data">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        function openLightbox(imgSrc, captionText) {
+            document.getElementById('lightboxImg').src = imgSrc;
+            document.getElementById('lightboxCaption').innerText = captionText;
+            document.getElementById('imageLightboxModal').classList.remove('hidden');
+        }
+
+        function closeLightbox() {
+            document.getElementById('imageLightboxModal').classList.add('hidden');
+        }
+
+        function updateDateRangeVolume() {
+            const startStr = document.getElementById('filterStartDate').value;
+            const endStr = document.getElementById('filterEndDate').value;
+            if(!startStr || !endStr) return;
+
+            const filtered = visitors.filter(r => {
+                const rDateStr = r.date ? r.date.substring(0, 10) : '';
+                return rDateStr >= startStr && rDateStr <= endStr;
+            });
+
+            document.getElementById('dateRangeVolumeResult').innerText = `${filtered.length} Tamu`;
+        }
+
+        function deleteVisitor(id) {
+            const v = visitors.find(i => i.id === id);
+            const vName = v ? v.name : 'Data ini';
+            if(confirm(`Apakah Anda yakin ingin menghapus data kunjungan "${vName}" dari sistem?`)) {
+                visitors = visitors.filter(i => i.id !== id);
+                localStorage.setItem('visitor_records', JSON.stringify(visitors));
+                renderVisitors();
+                if(currentRole === 'admin' && currentActiveView === 'admin') {
+                    renderAdminDashboard();
+                }
+                updateActiveVisitorBadge();
+                showToast('Berhasil Dihapus', `Data kunjungan telah dihapus`, 'success');
+            }
+        }
+
+        function previewCustomDateReport() {
+            const startStr = document.getElementById('filterStartDate').value;
+            const endStr = document.getElementById('filterEndDate').value;
+            if(!startStr || !endStr) {
+                showToast('Tanggal Kosong', 'Mohon pilih tanggal mulai dan tanggal akhir terlebih dahulu', 'error');
+                return;
+            }
+
+            const modal = document.getElementById('reportPreviewModal');
+            const title = document.getElementById('reportPreviewTitle');
+            const tbody = document.getElementById('reportPreviewTableBody');
+            const countLabel = document.getElementById('reportPreviewCount');
+
+            title.innerText = `Laporan Kunjungan Tamu (${startStr} s.d. ${endStr})`;
+
+            const filtered = visitors.filter(r => {
+                const rDateStr = r.date ? r.date.substring(0, 10) : '';
+                return rDateStr >= startStr && rDateStr <= endStr;
+            });
+
+            renderPreviewTable(filtered, tbody, countLabel);
+            modal.classList.remove('hidden');
+        }
+
+        function renderPreviewTable(filtered, tbody, countLabel) {
+            tbody.innerHTML = '';
+            if(filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">Tidak ada data untuk periode ini.</td></tr>`;
+                countLabel.innerText = 'Menampilkan 0 data';
+            } else {
+                filtered.forEach(req => {
+                    const dateFormatted = new Date(req.date).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+
+                    let badgeColor = 'bg-amber-100 text-amber-800';
+                    if(req.status === 'Selesai Check-Out') badgeColor = 'bg-emerald-100 text-emerald-800';
+
+                    tbody.innerHTML += `
+                        <tr class="border-b border-slate-100 hover:bg-slate-50">
+                            <td class="p-3 font-medium text-slate-900">${req.id}<br><span class="text-[10px] text-slate-400">${dateFormatted}</span></td>
+                            <td class="p-3 font-bold text-slate-900">${req.name}<br><span class="text-[10px] text-brand-600 font-semibold">${req.company}</span></td>
+                            <td class="p-3">${req.purpose} <br><span class="text-[10px] text-slate-500">Bertemu: ${req.target}</span></td>
+                            <td class="p-3"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${badgeColor}">${req.status}</span></td>
+                        </tr>
+                    `;
+                });
+                countLabel.innerText = `Menampilkan ${filtered.length} data kunjungan`;
+            }
+        }
+
+        function closeReportPreviewModal() {
+            document.getElementById('reportPreviewModal').classList.add('hidden');
+        }
+
+        function downloadCustomDateExcel() {
+            const startStr = document.getElementById('filterStartDate').value;
+            const endStr = document.getElementById('filterEndDate').value;
+            if(!startStr || !endStr) {
+                showToast('Tanggal Kosong', 'Mohon pilih tanggal mulai dan tanggal akhir terlebih dahulu', 'error');
+                return;
+            }
+
+            const filtered = visitors.filter(r => {
+                const rDateStr = r.date ? r.date.substring(0, 10) : '';
+                return rDateStr >= startStr && rDateStr <= endStr;
+            });
+
+            let titleHeader = `Laporan Kunjungan Visitor Periode ${startStr} s.d. ${endStr} Operasi Lini-1 Bandara Logistik Regional 6`;
+            generateExcelFile(filtered, titleHeader, `Laporan_Visitor_${startStr}_sd_${endStr}.xls`);
+        }
+
+        function generateExcelFile(filteredData, titleHeader, filename) {
+            let htmlContent = `
+                <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+                <head>
+                    <meta charset="utf-8">
+                    <title>${titleHeader}</title>
+                    <style>
+                        table { border-collapse: collapse; width: 100%; font-family: sans-serif; font-size: 11pt; }
+                        th { background-color: #026aa2; color: #ffffff; font-weight: bold; border: 1px solid #000000; padding: 8px; text-align: left; }
+                        td { border: 1px solid #dddddd; padding: 6px; text-align: left; vertical-align: top; }
+                        .title { font-size: 14pt; font-weight: bold; margin-bottom: 5px; }
+                        .subtitle { font-size: 10pt; color: #555555; margin-bottom: 15px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="title">${titleHeader}</div>
+                    <div class="subtitle">Dicetak pada: ${new Date().toLocaleString('id-ID')}</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID Visitor</th>
+                                <th>Waktu Masuk</th>
+                                <th>Nama Tamu</th>
+                                <th>Instansi / Perusahaan</th>
+                                <th>No. Telepon</th>
+                                <th>Jumlah Orang</th>
+                                <th>Tujuan Bertemu</th>
+                                <th>Keperluan</th>
+                                <th>Petugas Pencatat</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            filteredData.forEach(r => {
+                let dateFormatted = new Date(r.date).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+                htmlContent += `
+                    <tr>
+                        <td>${r.id}</td>
+                        <td>${dateFormatted}</td>
+                        <td>${r.name}</td>
+                        <td>${r.company}</td>
+                        <td>${r.phone || '-'}</td>
+                        <td>${r.count}</td>
+                        <td>${r.target}</td>
+                        <td>${r.purpose}</td>
+                        <td>${r.officer} (${r.officerDivision})</td>
+                        <td>${r.status}</td>
+                    </tr>
+                `;
+            });
+
+            htmlContent += `
+                        </tbody>
+                    </table>
+                </body>
+                </html>
+            `;
+
+            const blob = new Blob([htmlContent], { type: 'application/vnd.ms-excel' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            showToast('Berhasil Download', `File Laporan Excel Visitor berhasil diunduh`, 'success');
+        }
+
+        function openAddAdminModal() {
+            document.getElementById('newAdminUser').value = '';
+            document.getElementById('newAdminPass').value = '';
+            document.getElementById('addAdminModal').classList.remove('hidden');
+        }
+        function closeAddAdminModal() {
+            document.getElementById('addAdminModal').classList.add('hidden');
+        }
+        function saveNewAdmin() {
+            const user = document.getElementById('newAdminUser').value.trim();
+            const pass = document.getElementById('newAdminPass').value;
+            if(!user || !pass) {
+                showToast('Form Kosong', 'Username dan Password admin wajib diisi', 'error');
+                return;
+            }
+            adminUsers.push({ user, pass });
+            localStorage.setItem('visitor_admin_users', JSON.stringify(adminUsers));
+            closeAddAdminModal();
+            showToast('Admin Disimpan', `Akun admin ${user} berhasil ditambahkan`, 'success');
+        }
+
+        function showToast(title, message, type = 'success') {
+            const toast = document.getElementById('toastNotification');
+            const titleEl = document.getElementById('toastTitle');
+            const msgEl = document.getElementById('toastMessage');
+            const iconEl = document.getElementById('toastIcon');
+
+            titleEl.innerText = title;
+            msgEl.innerText = message;
+            iconEl.innerHTML = type === 'success' ? '<i class="fa-solid fa-circle-check text-brand-400"></i>' : '<i class="fa-solid fa-circle-exclamation text-amber-400"></i>';
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
